@@ -12,12 +12,5 @@
     "Mariusz",
     "Natalia"
   ],
-  "assignments": {
-    "Wiola": "Kamil",
-    "Dominik": "Irenka",
-    "Bogdan": "Natalia",
-    "Irenka": "Dominik",
-    "Anita": "Mariusz",
-    "Kamil": "Wiola"
-  }
+  "assignments": {}
 }
