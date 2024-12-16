@@ -118,6 +118,7 @@
 }
 
 #progress-bar {
+    width: 0; /* Startuje od 0% */
     height: 100%;
     background: linear-gradient(to right, red, yellow, green);
     transition: width 0.3s ease;
@@ -131,6 +132,7 @@
     font-weight: bold;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
+
 
 
 
@@ -342,19 +344,20 @@
           console.log('Stan po:', adminPanel.style.display);
       }
 
-    function updateProgress() {
+function updateProgress() {
     const totalParticipants = participants.length;
     const drawers = Object.keys(assignments).length;
     const percentage = totalParticipants > 0 ? Math.round((drawers / totalParticipants) * 100) : 0;
 
     // Aktualizacja paska postępu
     const progressBar = document.getElementById('progress-bar');
-    progressBar.style.height = `${percentage}%`;
+    progressBar.style.width = `${percentage}%`; // Zmieniamy szerokość zamiast wysokości
 
     // Aktualizacja tekstu procentowego
     const progressText = document.getElementById('progress-text');
     progressText.textContent = `${percentage}%`;
 }
+
 
 
     function startAutoSync() {
