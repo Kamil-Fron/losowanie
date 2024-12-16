@@ -247,6 +247,18 @@
           console.log('Stan po:', adminPanel.style.display);
       }
 
+    function startAutoSync() {
+    setInterval(async () => {
+        if (githubToken) {
+            try {
+                await loadDataFromGithub();
+            } catch (error) {
+                console.error('Błąd auto-synchronizacji:', error);
+            }
+        }
+    }, 30000); // synchronizacja co 30 sekund
+}
+
 async function loadDataFromGithub() {
     try {
       await retryOperation(async () => {
@@ -336,16 +348,40 @@ async function loadDataFromGithub() {
           }
       }
 
-      function saveGithubToken() {
-          const token = document.getElementById('github-token').value.trim();
-          if (token) {
-              githubToken = token;
-              localStorage.setItem('githubToken', token);
-              showStatusMessage('Token został zapisany!', 'success');
-              loadDataFromGithub();
-          }
-      }
+function saveGithubToken() {
+    const token = document.getElementById('github-token').value.trim();
+    if (token) {
+        githubToken = token;
+        localStorage.setItem('githubToken', token);
+        showStatusMessage('Token został zapisany!', 'success');
+        
+        // Natychmiast spróbuj załadować dane
+        loadDataFromGithub().catch(error => {
+            showStatusMessage('Błąd autoryzacji. Sprawdź poprawność tokenu.', 'error');
+            // Jeśli token jest nieprawidłowy, usuń go
+            localStorage.removeItem('githubToken');
+            githubToken = null;
+        });
+    }
+}
 
+function updateConnectionStatus(isConnected) {
+    const statusElement = document.createElement('div');
+    statusElement.id = 'connection-status';
+    statusElement.style.position = 'fixed';
+    statusElement.style.bottom = '10px';
+    statusElement.style.right = '10px';
+    statusElement.style.padding = '5px 10px';
+    statusElement.style.borderRadius = '5px';
+    statusElement.style.background = isConnected ? 'rgba(76, 175, 80, 0.3)' : 'rgba(244, 67, 54, 0.3)';
+    statusElement.textContent = isConnected ? '🟢 Połączono' : '🔴 Rozłączono';
+    
+    const existing = document.getElementById('connection-status');
+    if (existing) existing.remove();
+    document.body.appendChild(statusElement);
+}
+
+    
       async function verifyPassword() {
           const password = document.getElementById('admin-password').value;
           if (password === ADMIN_PASSWORD) {
@@ -487,6 +523,7 @@ async function loadDataFromGithub() {
       // Inicjalizacja przy starcie
 async function initializeApp() {
     createSnowflakes();
+    startAutoSync();
     
     // Próba pobrania tokenu
     githubToken = localStorage.getItem('githubToken');
