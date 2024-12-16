@@ -250,13 +250,15 @@
 async function loadDataFromGithub() {
     try {
         console.log('Próba połączenia z GitHub...');
-        const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${DATA_FILE}`, {
-            headers: {
-                'Authorization': `Bearer ${githubToken}`,
-                'Accept': 'application/vnd.github.v3+json',
-                'Cache-Control': 'no-cache'
-            }
-        });
+// Zmień URL w funkcji loadDataFromGithub na:
+const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${DATA_FILE}`, {
+    headers: {
+        'Authorization': `Bearer ${githubToken}`,
+        'Accept': 'application/vnd.github.v3+json'
+    },
+    mode: 'no-cors' // Dodaj tę linię
+});
+
         
         console.log('Status odpowiedzi:', response.status);
         
