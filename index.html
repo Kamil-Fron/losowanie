@@ -548,16 +548,6 @@ async function initializeApp() {
 
 // Dodaj event listener do DOMContentLoaded
 document.addEventListener('DOMContentLoaded', initializeApp);
-
-
-// Zmień obecny event listener na:
-document.addEventListener('DOMContentLoaded', initializeApp);
-
-          // Jeśli jest zapisany token, załaduj dane
-          if (githubToken) {
-              await loadDataFromGithub();
-          }
-      });
-  </script>
+</script>
 </body>
 </html>
