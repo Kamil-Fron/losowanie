@@ -103,6 +103,43 @@
           position: relative;
       }
 
+    /* Kontener paska postępu */
+#progress-container {
+    position: fixed;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* Pasek postępu */
+#progress-bar {
+    width: 100%;
+    height: 0;
+    background: linear-gradient(to top, red, yellow, green);
+    transition: height 0.3s ease;
+}
+
+/* Tekst procentowy */
+#progress-text {
+    position: absolute;
+    bottom: 10px;
+    color: white;
+    font-size: 1em;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+
       button:hover {
           background: #ff6666;
       }
@@ -261,7 +298,13 @@
                   <button onclick="closeAuthPanel()">Anuluj</button>
               </div>
             </div>
-       
+      
+      <div id="progress-container">
+        <div id="progress-bar"></div>
+        <span id="progress-text">0%</span>
+      </div>
+
+  
   </div>
 
   <script>
@@ -302,6 +345,21 @@
           }
           console.log('Stan po:', adminPanel.style.display);
       }
+
+    function updateProgress() {
+    const totalParticipants = participants.length;
+    const drawers = Object.keys(assignments).length;
+    const percentage = totalParticipants > 0 ? Math.round((drawers / totalParticipants) * 100) : 0;
+
+    // Aktualizacja paska postępu
+    const progressBar = document.getElementById('progress-bar');
+    progressBar.style.height = `${percentage}%`;
+
+    // Aktualizacja tekstu procentowego
+    const progressText = document.getElementById('progress-text');
+    progressText.textContent = `${percentage}%`;
+}
+
 
     function startAutoSync() {
     setInterval(async () => {
@@ -478,7 +536,8 @@ function updateConnectionStatus(isConnected) {
               saveDataToGithub();
               showStatusMessage('Uczestnik został dodany!', 'success');
           } else if (participants.includes(name)) {
-              showStatusMessage('Ta osoba już jest na liście!', 'warning');
+            updateProgress();  
+            showStatusMessage('Ta osoba już jest na liście!', 'warning');
           }
       }
 
@@ -490,6 +549,7 @@ function updateConnectionStatus(isConnected) {
               }
               updateParticipantsList();
               saveDataToGithub();
+              updateProgress();
               showStatusMessage('Uczestnik został usunięty!', 'success');
           }
       }
@@ -541,6 +601,7 @@ function updateConnectionStatus(isConnected) {
                   const drawnPerson = availablePeople[randomIndex];
                   assignments[drawerName] = drawnPerson;
                   saveDataToGithub();
+                  updateProgress();
                   result.innerHTML = `Wylosowałeś/aś: <strong>${drawnPerson}</strong>`;
               }
           }, 100);
@@ -639,6 +700,7 @@ async function initializeApp() {
         showStatusMessage('Wprowadź token GitHub klikając przycisk "Autoryzuj"', 'warning');
         updateConnectionStatus(false);
     }
+  updateProgress();
 }
 
 
