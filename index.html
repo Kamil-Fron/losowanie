@@ -594,7 +594,7 @@ function updateConnectionStatus(isConnected) {
               result.innerHTML = `Losowanie... ${randomPerson}`;
               counter++;
               
-              if (counter >= 10) {
+              if (counter >= 40) {
                   clearInterval(animationInterval);
                   const randomIndex = Math.floor(Math.random() * availablePeople.length);
                   const drawnPerson = availablePeople[randomIndex];
@@ -603,7 +603,7 @@ function updateConnectionStatus(isConnected) {
                   updateProgress();
                   result.innerHTML = `Wylosowałeś/aś: <strong>${drawnPerson}</strong>`;
               }
-          }, 300);
+          }, 50);
       }
 
       // Funkcja tworząca efekt śniegu
