@@ -1,15 +1,4 @@
 {
-  "participants": [
-    "Kamil",
-    "Anita",
-    "Wioleta",
-    "Kasia",
-    "Daniel",
-    "Mateusz",
-    "Dominik"
-  ],
-  "assignments": {
-    "Anita": "Kamil",
-    "Kasia": "Anita"
-  }
+  "participants": [],
+  "assignments": {}
 }
