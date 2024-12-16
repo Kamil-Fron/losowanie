@@ -1,20 +1,4 @@
 {
-    "name": [
-        "Kamil",
-        "Wioleta",
-        "Kasia",
-        "Anita",
-        "Daniel",
-        "Natalia",
-        "Irenka",
-        "Bogdan",
-        "Mariusz",
-        "Dominik",
-        "Mateusz"
-    ],
-    "metadata": {
-        "lastUpdate": "2024-12-16",
-        "totalNames": 11,
-        "version": "1.0"
-    }
+  "participants": [],
+  "assignments": {}
 }
