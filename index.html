@@ -103,41 +103,35 @@
           position: relative;
       }
 
-    /* Kontener paska postępu */
-#progress-container {
-    position: fixed;
-    top: 50%;
-    right: 20px;
-    transform: translateY(-50%);
-    width: 30px;
-    height: 300px;
+    #progress-container {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 300px;
+    height: 20px;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: flex-end;
 }
 
-/* Pasek postępu */
 #progress-bar {
-    width: 100%;
-    height: 0;
-    background: linear-gradient(to top, red, yellow, green);
-    transition: height 0.3s ease;
+    height: 100%;
+    background: linear-gradient(to right, red, yellow, green);
+    transition: width 0.3s ease;
 }
 
-/* Tekst procentowy */
 #progress-text {
     position: absolute;
-    bottom: 10px;
+    left: 10px;
     color: white;
-    font-size: 1em;
+    font-size: 0.8em;
     font-weight: bold;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
+
 
 
       button:hover {
@@ -256,6 +250,13 @@
 </head>
 <body>
 <div class="container">
+
+        <div id="progress-container">
+        <div id="progress-bar"></div>
+        <span id="progress-text">0%</span>
+      </div>
+
+  
     <div class="top-buttons">
         <button id="admin-button" type="button">Panel Administratora</button>
         <button id="auth-button" type="button">Autoryzuj</button>
@@ -297,12 +298,7 @@
                   <button onclick="authorizeToken()">Zatwierdź</button>
                   <button onclick="closeAuthPanel()">Anuluj</button>
               </div>
-            </div>
-      
-      <div id="progress-container">
-        <div id="progress-bar"></div>
-        <span id="progress-text">0%</span>
-      </div>
+          </div>
 
   
   </div>
