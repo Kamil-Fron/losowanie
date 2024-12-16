@@ -16,6 +16,45 @@
           overflow-x: hidden;
       }
 
+
+      .top-buttons {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 3;
+    display: flex;
+    gap: 10px;
+}
+
+#auth-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    z-index: 1000;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.auth-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.auth-content h3 {
+    margin: 0 0 10px 0;
+    color: #4CAF50;
+}
+
+#auth-token-input {
+    width: 300px;
+}
+
+
+    
       .container {
           max-width: 800px;
           margin: 0 auto;
@@ -129,14 +168,19 @@
               transform: translateY(100vh);
           }
       }
+.top-buttons button {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
 
-      #admin-button {
-          position: absolute;
-          top: 10px;
-          right: 10px;
-          background: rgba(255, 255, 255, 0.1);
-          z-index: 3;
-      }
+.top-buttons button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
 
       #github-auth {
           margin-bottom: 20px;
@@ -174,10 +218,13 @@
   </style>
 </head>
 <body>
-  <div class="container">
-      <button id="admin-button" type="button">Panel Administratora</button>
-      
-      <h1>🎄 Losowanie Prezentów Świątecznych 🎁</h1>
+<div class="container">
+    <div class="top-buttons">
+        <button id="admin-button" type="button">Panel Administratora</button>
+        <button id="auth-button" type="button">Autoryzuj</button>
+    </div>
+    
+    <h1>🎄 Losowanie Prezentów Świątecznych 🎁</h1>
       
       <div id="drawing-panel">
           <h2>Wylosuj osobę na prezent</h2>
@@ -206,6 +253,15 @@
               </div>
           </div>
       </div>
+          <div id="auth-panel" style="display: none;">
+              <div class="auth-content">
+                  <h3>Autoryzacja GitHub</h3>
+                  <input type="text" id="auth-token-input" placeholder="GitHub Personal Access Token">
+                  <button onclick="authorizeToken()">Zatwierdź</button>
+                  <button onclick="closeAuthPanel()">Anuluj</button>
+              </div>
+            </div>
+       
   </div>
 
   <script>
@@ -518,6 +574,44 @@ function updateConnectionStatus(isConnected) {
         }
     }
 }
+
+
+function showAuthPanel() {
+    const authPanel = document.getElementById('auth-panel');
+    authPanel.style.display = 'block';
+    // Wyczyść poprzednią wartość
+    document.getElementById('auth-token-input').value = '';
+}
+
+function closeAuthPanel() {
+    const authPanel = document.getElementById('auth-panel');
+    authPanel.style.display = 'none';
+}
+
+function authorizeToken() {
+    const token = document.getElementById('auth-token-input').value.trim();
+    if (token) {
+        githubToken = token;
+        localStorage.setItem('githubToken', token);
+        
+        // Próba załadowania danych z nowym tokenem
+        loadDataFromGithub()
+            .then(() => {
+                showStatusMessage('Autoryzacja udana!', 'success');
+                closeAuthPanel();
+            })
+            .catch(error => {
+                showStatusMessage('Błąd autoryzacji. Sprawdź poprawność tokenu.', 'error');
+                localStorage.removeItem('githubToken');
+                githubToken = null;
+            });
+    } else {
+        showStatusMessage('Wprowadź token!', 'warning');
+    }
+}
+
+
+
     
 
       // Inicjalizacja przy starcie
@@ -525,8 +619,9 @@ async function initializeApp() {
     createSnowflakes();
     startAutoSync();
     
-    // Dodaj event listener do przycisku administratora
+    // Dodaj event listenery do przycisków
     document.getElementById('admin-button').addEventListener('click', toggleAdminPanel);
+    document.getElementById('auth-button').addEventListener('click', showAuthPanel);
     
     // Próba pobrania tokenu
     githubToken = localStorage.getItem('githubToken');
@@ -541,10 +636,11 @@ async function initializeApp() {
             updateConnectionStatus(false);
         }
     } else {
-        showStatusMessage('Wprowadź token GitHub w panelu administratora', 'warning');
+        showStatusMessage('Wprowadź token GitHub klikając przycisk "Autoryzuj"', 'warning');
         updateConnectionStatus(false);
     }
 }
+
 
 // Dodaj event listener do DOMContentLoaded
 document.addEventListener('DOMContentLoaded', initializeApp);
