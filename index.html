@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Losowanie Prezentów Świątecznych</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f2f5;
+            text-align: center;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: 20px;
+            position: relative;
+        }
+        h1 {
+            color: #d32f2f;
+        }
+        input, button {
+            padding: 10px;
+            margin: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #d32f2f;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #b71c1c;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+        .participants {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .error {
+            color: #d32f2f;
+            margin-top: 10px;
+        }
+        #admin-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 12px;
+            padding: 5px 10px;
+            background-color: #666;
+            opacity: 0.7;
+        }
+        #admin-button:hover {
+            opacity: 1;
+        }
+        #admin-panel {
+            display: none;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px dashed #ccc;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 500px;
+        }
+        .close-button {
+            float: right;
+            cursor: pointer;
+            font-size: 20px;
+        }
+        .snowflake {
+            position: absolute;
+            font-size: 20px;
+            color: #d32f2f;
+            opacity: 0.6;
+            animation: fall linear infinite;
+        }
+        @keyframes fall {
+            to {
+                transform: translateY(100vh);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button id="admin-button" onclick="toggleAdminPanel()">Panel Administratora</button>
+        
+        <h1>🎄 Losowanie Prezentów Świątecznych 🎁</h1>
+        
+        <div id="drawing-panel">
+            <h2>Wylosuj osobę na prezent</h2>
+            <input type="text" id="name-input" placeholder="Wpisz swoje imię">
+            <button onclick="drawPerson()">Losuj osobę</button>
+            <div id="result"></div>
+        </div>
+
+        <div id="admin-panel">
+            <h2>Panel Administratora</h2>
+            <div id="password-section">
+                <input type="password" id="admin-password" placeholder="Hasło administratora">
+                <button onclick="verifyPassword()">Zaloguj</button>
+            </div>
+            <div id="admin-controls" style="display: none;">
+                <input type="text" id="participant-input" placeholder="Wpisz imię uczestnika">
+                <button onclick="addParticipant()">Dodaj uczestnika</button>
+                <button onclick="resetDrawing()" style="background-color: #666;">Reset losowania</button>
+                <div class="participants">
+                    <h3>Lista uczestników:</h3>
+                    <ul id="participants-list"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let participants = [];
+        let assignments = {};
+        const ADMIN_PASSWORD = "123123"; // Zmienione hasło na 123123
+
+        // Dodawanie płatków śniegu
+        function createSnowflakes() {
+            const container = document.querySelector('.container');
+            for (let i = 0; i < 5; i++) {
+                const snowflake = document.createElement('div');
+                snowflake.className = 'snowflake';
+                snowflake.style.left = Math.random() * 100 + '%';
+                snowflake.style.animationDuration = Math.random() * 3 + 2 + 's';
+                snowflake.style.opacity = Math.random();
+                snowflake.innerHTML = '❄';
+                container.appendChild(snowflake);
+            }
+        }
+
+        function toggleAdminPanel() {
+            const adminPanel = document.getElementById('admin-panel');
+            if (adminPanel.style.display === 'none') {
+                adminPanel.style.display = 'block';
+                document.getElementById('password-section').style.display = 'block';
+                document.getElementById('admin-controls').style.display = 'none';
+                document.getElementById('admin-password').value = '';
+            } else {
+                adminPanel.style.display = 'none';
+            }
+        }
+
+        function verifyPassword() {
+            const password = document.getElementById('admin-password').value;
+            if (password === ADMIN_PASSWORD) {
+                document.getElementById('password-section').style.display = 'none';
+                document.getElementById('admin-controls').style.display = 'block';
+            } else {
+                alert('Nieprawidłowe hasło!');
+            }
+        }
+
+        function addParticipant() {
+            const input = document.getElementById('participant-input');
+            const name = input.value.trim();
+            
+            if (name && !participants.includes(name)) {
+                participants.push(name);
+                input.value = '';
+                updateParticipantsList();
+            } else if (participants.includes(name)) {
+                alert('Ta osoba już jest na liście!');
+            }
+        }
+
+        function updateParticipantsList() {
+            const list = document.getElementById('participants-list');
+            list.innerHTML = '';
+            participants.forEach(name => {
+                const li = document.createElement('li');
+                li.textContent = name;
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = '❌';
+                deleteButton.style.marginLeft = '10px';
+                deleteButton.onclick = () => removeParticipant(name);
+                li.appendChild(deleteButton);
+                list.appendChild(li);
+            });
+        }
+
+        function removeParticipant(name) {
+            if (confirm(`Czy na pewno chcesz usunąć ${name} z listy?`)) {
+                participants = participants.filter(p => p !== name);
+                if (assignments[name]) {
+                    delete assignments[name];
+                }
+                updateParticipantsList();
+            }
+        }
+
+        function resetDrawing() {
+            if (confirm('Czy na pewno chcesz zresetować wszystkie losowania?')) {
+                assignments = {};
+                alert('Losowanie zostało zresetowane!');
+            }
+        }
+
+        function drawPerson() {
+            const nameInput = document.getElementById('name-input');
+            const result = document.getElementById('result');
+            const drawerName = nameInput.value.trim();
+
+            if (!participants.includes(drawerName)) {
+                result.innerHTML = '<span class="error">Nie ma Cię na liście uczestników!</span>';
+                return;
+            }
+
+            if (assignments[drawerName]) {
+                result.innerHTML = `<span>Już wylosowałeś/aś osobę: ${assignments[drawerName]}</span>`;
+                return;
+            }
+
+            const availablePeople = participants.filter(name => 
+                name !== drawerName && 
+                !Object.values(assignments).includes(name)
+            );
+
+            if (availablePeople.length === 0) {
+                result.innerHTML = '<span class="error">Nie ma już dostępnych osób do wylosowania!</span>';
+                return;
+            }
+
+            result.innerHTML = 'Losowanie...';
+            
+            // Animacja losowania
+            let counter = 0;
+            const animationInterval = setInterval(() => {
+                const randomPerson = availablePeople[Math.floor(Math.random() * availablePeople.length)];
+                result.innerHTML = `Losowanie... ${randomPerson}`;
+                counter++;
+                
+                if (counter >= 10) {
+                    clearInterval(animationInterval);
+                    const randomIndex = Math.floor(Math.random() * availablePeople.length);
+                    const drawnPerson = availablePeople[randomIndex];
+                    assignments[drawerName] = drawnPerson;
+                    result.innerHTML = `Wylosowałeś/aś: <strong>${drawnPerson}</strong>`;
+                }
+            }, 100);
+        }
+
+        // Inicjalizacja płatków śniegu
+        createSnowflakes();
+    </script>
+</body>
+</html>
